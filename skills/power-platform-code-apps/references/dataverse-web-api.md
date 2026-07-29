@@ -164,3 +164,31 @@ GET /EntityDefinitions(LogicalName='ctso_incident')/Attributes?$filter=LogicalNa
 ```
 
 A 404/empty result means "doesn't exist yet, safe to create"; a non-empty result means "already exists, skip".
+
+## 8. Reading an existing schema (docs, drift-checks, tooling)
+
+Don't trust a stale data-model export or an old design doc — the live environment is the only source of truth once anyone has clicked around in make.powerapps.com. Query it directly whenever you need to generate documentation, build a diagram, or verify a schema hasn't drifted from what's on paper.
+
+List every custom table under your prefix:
+
+```http
+GET /EntityDefinitions?$filter=IsCustomEntity eq true&$select=LogicalName,SchemaName,DisplayName,DisplayCollectionName,MetadataId
+```
+
+**Gotcha — `startswith` is not supported on metadata entities.** `EntityDefinitions?$filter=startswith(LogicalName,'ctso_')` fails with `400 0x8006088a "The 'startswith' function isn't supported for Metadata Entities"`. There's no server-side prefix filter — pull everything with `IsCustomEntity eq true` and filter by prefix client-side (`.filter(e => e.LogicalName.startsWith('ctso_'))`).
+
+List a table's custom columns (skips the ~20 standard system attributes every table has — createdon, ownerid, statecode, versionnumber, etc.):
+
+```http
+GET /EntityDefinitions(LogicalName='ctso_incident')/Attributes?$filter=IsCustomAttribute eq true&$select=LogicalName,AttributeType,DisplayName,RequiredLevel
+```
+
+List the relationships where a table owns the lookup (i.e. the table you'd see a "Region" or "Owner" column on):
+
+```http
+GET /RelationshipDefinitions/Microsoft.Dynamics.CRM.OneToManyRelationshipMetadata?$filter=ReferencingEntity eq 'ctso_incident'&$select=SchemaName,ReferencedEntity,ReferencingAttribute
+```
+
+**Gotcha — omitting the type-cast segment doesn't error, it silently returns nothing.** `RelationshipDefinitions?$filter=ReferencingEntity eq '...'` (without `/Microsoft.Dynamics.CRM.OneToManyRelationshipMetadata`) is a "successful" `200` with an empty `value: []` array, since `ReferencingEntity` only exists on the OneToMany subtype and the base `RelationshipMetadataBase` filter matches nothing. Easy to misread as "this table has no relationships" — always include the cast.
+
+The result also includes standard system relationships (`business_unit_ctso_incident`, `owner_ctso_incident`, `lk_ctso_incident_createdby`, `team_ctso_incident`, etc.) — filter to `SchemaName` starting with your prefix to keep only the custom ones you actually authored.

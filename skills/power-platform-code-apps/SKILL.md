@@ -32,6 +32,7 @@ It contains no project-specific business content — only the mechanics of the p
 5. **(Optional) Add a model-driven app** alongside the Code App for admin/ops screens backed by the same tables — sitemap + AppModule. See [references/model-driven-app.md](references/model-driven-app.md).
 6. **Build & deploy the Code App** — `npm run build` then `npx power-apps push`. Watch for the static-asset bundling gotcha in [references/code-app-deployment.md](references/code-app-deployment.md).
 7. **Package for production** — make sure the Code App, tables, roles, and sitemap all belong to one named solution; export a managed solution and verify it's self-contained. See [references/solution-alm.md](references/solution-alm.md).
+8. **Keep docs honest** — before trusting a design doc's data model, re-read the live schema and diagram it fresh; exports and diagrams go stale the moment anyone edits a table by hand. See [references/dataverse-web-api.md](references/dataverse-web-api.md) §8.
 
 Each reference file is self-contained with working request/response shapes and copy-pasteable script snippets — read the one relevant to the task at hand rather than all of them up front.
 
