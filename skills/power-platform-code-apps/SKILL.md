@@ -13,7 +13,8 @@ It contains no project-specific business content — only the mechanics of the p
 
 - The user has a Code App (React/Vite, `power.config.json`, `src/generated/*`) they want to connect to real Dataverse tables instead of in-memory data.
 - The user needs to create Dataverse tables/columns/relationships programmatically (faster and more repeatable than clicking through make.powerapps.com for dozens of columns).
-- The user needs security roles, native Dataverse auditing, a model-driven app (sitemap/AppModule) alongside the Code App, or a clean exportable managed solution.
+- The user needs security roles, native Dataverse auditing, a model-driven app (sitemap/AppModule/forms) alongside — or entirely instead of — the Code App, or a clean exportable managed solution.
+- The user wants a **pure, license-free model-driven app** on existing tables (no Code App at all) — same Dataverse mechanics, see [references/model-driven-app.md](references/model-driven-app.md), including which model-driven customizations stay license-free (plain forms/views/sitemaps) versus which typically require an additional Power Apps license (Custom Pages / embedded Canvas Apps, PCF controls calling external services, premium connectors, AI Builder/Copilot).
 - The user hits a Code App deployment error (broken images, `power-apps push` failures, table deletion blocked, etc.) — see [references/troubleshooting.md](references/troubleshooting.md).
 
 ## Prerequisites
@@ -29,7 +30,7 @@ It contains no project-specific business content — only the mechanics of the p
 2. **Provision Dataverse** — publisher, solution, tables, columns, relationships via raw Web API calls (idempotent scripts, re-runnable). Same reference.
 3. **Wire the Code App to Dataverse** — flip data-source config from in-memory to Dataverse, regenerate/adjust generated hooks/models. See [references/code-app-deployment.md](references/code-app-deployment.md).
 4. **Add security & governance** — real Dataverse security roles + native auditing instead of hand-rolled "governance tables". See [references/security-and-audit.md](references/security-and-audit.md).
-5. **(Optional) Add a model-driven app** alongside the Code App for admin/ops screens backed by the same tables — sitemap + AppModule. See [references/model-driven-app.md](references/model-driven-app.md).
+5. **(Optional) Add a model-driven app** alongside — or entirely instead of — the Code App for admin/ops screens backed by the same tables: sitemap + AppModule, plus real main forms (FormXml) if the auto-generated 2-field default isn't enough. A Dataverse component (table, role) can belong to more than one solution at once, so a second, standalone model-driven app can reuse an existing Code App project's tables/roles additively, without touching its solution. See [references/model-driven-app.md](references/model-driven-app.md).
 6. **Build & deploy the Code App** — `npm run build` then `npx power-apps push`. Watch for the static-asset bundling gotcha in [references/code-app-deployment.md](references/code-app-deployment.md).
 7. **Package for production** — make sure the Code App, tables, roles, and sitemap all belong to one named solution; export a managed solution and verify it's self-contained. See [references/solution-alm.md](references/solution-alm.md).
 8. **Keep docs honest** — before trusting a design doc's data model, re-read the live schema and diagram it fresh; exports and diagrams go stale the moment anyone edits a table by hand. See [references/dataverse-web-api.md](references/dataverse-web-api.md) §8.
