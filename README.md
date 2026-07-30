@@ -1,44 +1,63 @@
-# Power Platform Code Apps + Model-driven Apps + Dataverse — Claude Code Skill
+# Power Platform — Claude Code Skills
 
-A [Claude Code](https://claude.com/claude-code) skill packaging field-tested, copy-pasteable patterns for building **Power Apps Code Apps** (React/Vite apps) and/or **standalone Model-driven Apps** backed by **Dataverse** — schema provisioning, security roles, native auditing, model-driven app sitemaps/forms/subgrids/dashboards, multi-app data integrity, and solution ALM, done directly against the Dataverse Web API.
+A [Claude Code](https://claude.com/claude-code) skill collection packaging field-tested, copy-pasteable patterns for building on the **Power Platform** — Code Apps, Model-driven Apps, Power Pages, and Dataverse — all scripted directly against the Dataverse Web API.
 
 No project-specific or organization-specific content — just the mechanics of the platform, distilled from real end-to-end build-and-deploy sessions.
 
-## What's a Power Apps Code App?
+## Skills in this repo
 
-A **Code App** is a normal React (or other supported framework) app, written and built with your own tooling (Vite, npm, TypeScript), that Power Platform can host, secure, and connect to Dataverse/connectors just like a low-code Canvas App — via the `@microsoft/power-apps` SDK and `power-apps` CLI. It's the "pro-dev" alternative to Canvas Apps and model-driven apps, useful when you want full control over UI code but still want Power Platform's data layer, security model, and ALM. This skill does **not** cover building Canvas Apps themselves — Code Apps and Model-driven Apps are the two app types it has real field experience with.
+### `power-platform-code-apps` — Code Apps + Model-driven Apps + Dataverse
 
-You can start one from scratch, or generate a starting point at [vibe.powerapps.com](https://vibe.powerapps.com) (prompt-based scaffolding) and take it from there — this skill assumes the latter is common but works either way.
+For building **Power Apps Code Apps** (React/Vite) and/or **standalone Model-driven Apps** backed by Dataverse — schema provisioning, security roles, native auditing, model-driven forms/subgrids/dashboards, multi-app data integrity, and solution ALM.
 
-## Or skip the Code App entirely: a pure Model-driven App
+Entry point: [`skills/power-platform-code-apps/SKILL.md`](skills/power-platform-code-apps/SKILL.md)
 
-Everything Dataverse-side (tables, security, auditing) applies equally if you just want a license-free **Model-driven App** on top of existing tables — no React, no custom code at all. This skill covers building those forms, subgrids, and dashboards from scratch via raw FormXml, and — when a Model-driven App is added *alongside* an existing Code App on the same tables — the data-integrity issues that come from two apps sharing one set of tables (see [references/multi-app-data-integrity.md](skills/power-platform-code-apps/references/multi-app-data-integrity.md)).
+| Reference | Content |
+|---|---|
+| [`dataverse-web-api.md`](skills/power-platform-code-apps/references/dataverse-web-api.md) | Tables, columns, relationships, RequiredLevel gotcha |
+| [`security-and-audit.md`](skills/power-platform-code-apps/references/security-and-audit.md) | Security roles, core-platform-privileges gap, native auditing |
+| [`model-driven-app.md`](skills/power-platform-code-apps/references/model-driven-app.md) | Sitemap, AppModule, FormXml, subgrids, dashboards |
+| [`multi-app-data-integrity.md`](skills/power-platform-code-apps/references/multi-app-data-integrity.md) | Shared-table null-field risks between multiple apps |
+| [`solution-alm.md`](skills/power-platform-code-apps/references/solution-alm.md) | Solution components, export, package verification |
+| [`code-app-deployment.md`](skills/power-platform-code-apps/references/code-app-deployment.md) | SDK/CLI versions, static-asset bundling trap, deploy sequence |
+| [`troubleshooting.md`](skills/power-platform-code-apps/references/troubleshooting.md) | Error messages → causes → fixes |
+
+---
+
+### `power-platform-pages` — Power Pages
+
+For building and scripting **Power Pages** sites — web templates, routing, anonymous access, table permissions, site settings, and the Enhanced vs Standard Data Model split.
+
+Entry point: [`skills/power-platform-pages/SKILL.md`](skills/power-platform-pages/SKILL.md)
+
+| Reference | Content |
+|---|---|
+| [`data-model.md`](skills/power-platform-pages/references/data-model.md) | Enhanced (mspp_/powerpagecomponent) vs Standard (adx_) — auto-detect pattern, entity mapping, component type codes |
+| [`web-templates.md`](skills/power-platform-pages/references/web-templates.md) | Upload HTML templates (EDM two-step file column vs SDM single PATCH), page templates, routing root/content page pair |
+| [`anonymous-access.md`](skills/power-platform-pages/references/anonymous-access.md) | AutoLogin gotcha, required site settings for mixed access, web page access control rules, cache delay |
+| [`table-permissions.md`](skills/power-platform-pages/references/table-permissions.md) | Create permission records, associate with web roles via $ref (N:N), scope values, idempotent GUID pattern |
+| [`troubleshooting.md`](skills/power-platform-pages/references/troubleshooting.md) | Auth redirect loops, 404 sub-pages, 403 portal API, template upload silently ignored, cache delays |
+
+---
 
 ## Where things happen
 
 | Task | Where |
 |---|---|
 | Design/prompt a starting Code App | [vibe.powerapps.com](https://vibe.powerapps.com) |
-| Environment admin (enable code apps, manage users) | [Power Platform Admin Center](https://admin.powerplatform.microsoft.com) |
+| Build and manage Power Pages sites | [make.powerpages.microsoft.com](https://make.powerpages.microsoft.com) |
+| Environment admin | [Power Platform Admin Center](https://admin.powerplatform.microsoft.com) |
 | Tables, security roles, solutions (UI) | [make.powerapps.com](https://make.powerapps.com) |
-| Everything above, scripted | Dataverse Web API (`<env>/api/data/v9.2/...`) — see this skill's references |
-| Build & deploy the Code App | Local machine: `npm run build` + `npx power-apps push` |
-
-## Using this skill
-
-Copy `skills/power-platform-code-apps/` into a Claude Code skills directory (project-local `.claude/skills/` or a plugin), or point Claude Code at this repo. The entry point is [`SKILL.md`](skills/power-platform-code-apps/SKILL.md); it links out to focused reference docs so only the relevant one gets loaded for a given task:
-
-- [`references/dataverse-web-api.md`](skills/power-platform-code-apps/references/dataverse-web-api.md) — creating tables, columns, relationships, Autonumber columns, and the `RequiredLevel` client-side-only gotcha, via raw Web API calls
-- [`references/security-and-audit.md`](skills/power-platform-code-apps/references/security-and-audit.md) — security roles, privileges (including the core-platform-privileges gap in script-built roles), native Dataverse auditing
-- [`references/model-driven-app.md`](skills/power-platform-code-apps/references/model-driven-app.md) — sitemap, AppModule, full main forms, related-record subgrids, and dashboards — standalone or alongside a Code App
-- [`references/multi-app-data-integrity.md`](skills/power-platform-code-apps/references/multi-app-data-integrity.md) — what actually stops one app from crashing on data another app left incomplete, when multiple apps share the same tables
-- [`references/solution-alm.md`](skills/power-platform-code-apps/references/solution-alm.md) — solution components, export, verifying package completeness
-- [`references/code-app-deployment.md`](skills/power-platform-code-apps/references/code-app-deployment.md) — SDK/CLI version gotchas, data sources, the static-asset bundling trap, deploy sequence
-- [`references/troubleshooting.md`](skills/power-platform-code-apps/references/troubleshooting.md) — quick lookup table of error messages → causes → fixes
+| Everything above, scripted | Dataverse Web API (`<env>/api/data/v9.2/...`) |
+| Build & deploy a Code App | `npm run build` + `npx power-apps push` |
 
 ## Core principle
 
-Script the Dataverse Web API directly rather than clicking through the portal UI for repetitive schema/security work. Authenticate on demand with `az account get-access-token` (never persist tokens to disk), and write provisioning scripts to be idempotent (check-then-create) so they're safely re-runnable.
+Script the Dataverse Web API directly rather than clicking through portal UIs. Authenticate on demand with `az account get-access-token` (never persist tokens to disk), and write provisioning scripts to be idempotent (check-then-create / pre-assigned GUIDs with PATCH upsert) so they're safely re-runnable.
+
+## Using a skill
+
+Copy the relevant `skills/<name>/` directory into a Claude Code skills directory (project-local `.claude/skills/` or a plugin), or point Claude Code at this repo. Each skill's `SKILL.md` is the entry point; it loads only the reference docs relevant to the current task.
 
 ## License
 
