@@ -40,6 +40,21 @@ Entry point: [`skills/power-platform-pages/SKILL.md`](skills/power-platform-page
 
 ---
 
+### `power-platform-copilot-studio` — Copilot Studio agents
+
+For scripting **Copilot Studio agents** via the Dataverse Web API — bot/botcomponent entity structure, updating instructions (YAML blob, targeted regex approach), icons (authoring vs. Teams/M365 — two separate fields), publish-time validation gotchas, and knowledge source limitations.
+
+Entry point: [`skills/power-platform-copilot-studio/SKILL.md`](skills/power-platform-copilot-studio/SKILL.md)
+
+| Reference | Content |
+|---|---|
+| [`agent-structure.md`](skills/power-platform-copilot-studio/references/agent-structure.md) | bot + botcomponent data model, component types, GPT component YAML shape, why knowledge sources can't be fully scripted, why from-scratch creation needs the portal |
+| [`scripting.md`](skills/power-platform-copilot-studio/references/scripting.md) | Instructions update via targeted regex on the YAML blob, YAML block scalar pattern, why not to parse+re-serialize |
+| [`icons.md`](skills/power-platform-copilot-studio/references/icons.md) | `iconbase64` vs `applicationmanifestinformation.teams.colorIcon/outlineIcon`, format requirements, Teams CDN caching delay |
+| [`troubleshooting.md`](skills/power-platform-copilot-studio/references/troubleshooting.md) | BotSynchronizationError, publish-time validation vs write-time, broken YAML after re-serialization, Teams icon cache |
+
+---
+
 ## Where things happen
 
 | Task | Where |
