@@ -192,3 +192,41 @@ GET /RelationshipDefinitions/Microsoft.Dynamics.CRM.OneToManyRelationshipMetadat
 **Gotcha — omitting the type-cast segment doesn't error, it silently returns nothing.** `RelationshipDefinitions?$filter=ReferencingEntity eq '...'` (without `/Microsoft.Dynamics.CRM.OneToManyRelationshipMetadata`) is a "successful" `200` with an empty `value: []` array, since `ReferencingEntity` only exists on the OneToMany subtype and the base `RelationshipMetadataBase` filter matches nothing. Easy to misread as "this table has no relationships" — always include the cast.
 
 The result also includes standard system relationships (`business_unit_ctso_incident`, `owner_ctso_incident`, `lk_ctso_incident_createdby`, `team_ctso_incident`, etc.) — filter to `SchemaName` starting with your prefix to keep only the custom ones you actually authored.
+
+## 9. Autonumber columns — the only genuinely synchronous "auto-fill" mechanism
+
+If you need a column (e.g. a ticket/incident number) to always be populated without the user typing it, don't reach for a Power Automate flow that fills it in after create — see the "synchronous vs. asynchronous" gotcha in [multi-app-data-integrity.md](multi-app-data-integrity.md) for why that's fragile. Instead, convert the column to a native **Autonumber**:
+
+```http
+PUT /EntityDefinitions(LogicalName='ctso_incident')/Attributes(<attribute-MetadataId-guid>)
+{
+  "@odata.type": "Microsoft.Dynamics.CRM.StringAttributeMetadata",
+  "AutoNumberFormat": "INC-{SEQNUM:5}"
+}
+```
+
+Then `POST /PublishAllXml`, and optionally seed the counter above whatever ad-hoc values already exist in the table (default seed is `1000`):
+
+```http
+POST /SetAutoNumberSeed
+{ "EntityName": "ctso_incident", "AttributeName": "ctso_incidentnumber", "Value": 50000 }
+```
+
+This only works on **string** columns — there's no Autonumber equivalent for datetime/integer columns; those still need either manual entry or an async flow (accept the flow's inherent null-window for those, or make the column `Recommended` rather than `ApplicationRequired` if blocking on it is worse than allowing it blank).
+
+**Gotcha — once set, Autonumber always overwrites whatever value a client sends, including a client-generated placeholder.** If another app (a Code App, say) generates its own guessed number client-side and sends it on create, Dataverse silently replaces it with the real autonumber — the client's own success message may briefly show the wrong value until it re-reads the record, but the persisted data is always correct. This is a one-time, disclosed trade-off worth explaining to whoever owns the other app, not a bug to work around.
+
+## 10. `RequiredLevel` is enforced client-side, and only for fields actually on the form
+
+Setting a column's `RequiredLevel` to `ApplicationRequired` makes Unified Interface block Save with a red asterisk — but **only if that field actually appears on the form the user is looking at.** The platform itself accepts a `POST`/`PATCH` with the field omitted regardless of `RequiredLevel` — there is no server-side enforcement. Two ways this bites you in practice:
+
+- A field genuinely isn't on the form you think it is (see the "near-duplicate field" gotcha in [model-driven-app.md](model-driven-app.md)) — the constraint silently does nothing.
+- The metadata was published, but a user's already-open Unified Interface session may still be showing a cached copy of the form until they hard-refresh or reopen the app.
+
+After marking any field `ApplicationRequired`, verify it's actually present on **every** form real users create/edit records from — don't assume the metadata change alone is sufficient:
+
+```http
+GET /systemforms(<formid>)?$select=formxml
+```
+
+...and check the `formxml` string for `datafieldname="ctso_yourfield"`. If multiple apps/forms exist for the same table, check all of them.

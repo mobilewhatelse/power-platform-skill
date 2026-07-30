@@ -138,6 +138,77 @@ Then `PATCH /systemforms(<formid>) { "formxml": "<form>...</form>" }` and `POST 
 
 **Gotcha — label text needs XML escaping.** An unescaped `&` (e.g. a section labeled "Status & Deadlines") fails with an opaque `400 Error in parsing formxml. Line 1. Position 1409 ... An error occurred while parsing EntityName` — the position points at the ampersand, but the message gives no hint it's an escaping problem. Escape `&`, `<`, `>`, `"` in every label/description string before interpolating it into the XML.
 
+**Gotcha — binding a field to a near-duplicate standard field instead of your custom one.** Every table has standard system fields (`ownerid`, `createdby`, `modifiedby`) that are conceptually similar to, but distinct from, custom fields you may have created (e.g. a custom `ctso_owner` lookup meant to represent "who's assigned to this incident", separate from the platform's own `ownerid` used for security/business-unit assignment). It's easy to accidentally bind a form control to the wrong one — `datafieldname="ownerid"` instead of `datafieldname="ctso_owner"` — since both are plausibly labeled "Owner" in the maker UI and both are valid lookup fields on the table. The form will look completely correct (a field labeled "Owner", populated automatically since `ownerid` is always auto-set), while your actual custom field is silently never shown to the user and stays blank forever. **Always double-check `datafieldname` against your own schema's logical name, not just the on-screen label**, especially for any field whose name resembles a standard Dataverse field (`owner`/`ownerid`, `createdby`/`createdby`, `modifiedon`/`modifiedon`).
+
+## 8. Removing/hiding a field from a form
+
+To hide a field entirely (e.g. because it's now auto-populated by an [Autonumber column](dataverse-web-api.md#9-autonumber-columns--the-only-genuinely-synchronous-auto-fill-mechanism) and there's nothing left for the user to fill in), locate the control's enclosing `<row>` and remove the whole block — don't try to leave an empty `<cell>` behind:
+
+```js
+const marker = 'datafieldname="ctso_incidentnumber"';
+const controlIdx = xml.indexOf(marker);
+const rowStart = xml.lastIndexOf('<row>', controlIdx);
+const rowEnd = xml.indexOf('</row>', controlIdx) + '</row>'.length;
+xml = xml.slice(0, rowStart) + xml.slice(rowEnd);
+```
+
+This string-splice approach avoids needing a full XML parser (no JS XML library round-trips FormXml cleanly enough to trust without a diff) while still removing the entire row rather than leaving a stray empty control.
+
+## 9. Related-record subgrids on a form
+
+Show a table's related child records (e.g. an Incident's Action Items) directly on its form:
+
+```xml
+<section showlabel="true" showbar="true" name="section_ActionItems" id="{new-guid}" columns="1">
+  <labels><label description="Action Items" languagecode="1033" /></labels>
+  <rows><row><cell id="{new-guid}" showlabel="false">
+    <labels><label description="Action Items" languagecode="1033" /></labels>
+    <control id="ActionItems" classid="{E7A81278-8635-4d9e-8D4D-59480B391C5B}">
+      <parameters>
+        <ViewId>{associated-view-guid}</ViewId>
+        <IsUserView>false</IsUserView>
+        <RelationshipName>ctso_ActionItem_ctso_Incident_ctso_Incident</RelationshipName>
+        <TargetEntityType>ctso_actionitem</TargetEntityType>
+        <AutoExpand>Auto</AutoExpand>
+        <EnableQuickFind>false</EnableQuickFind>
+        <EnableViewPicker>false</EnableViewPicker>
+        <ViewIds />
+        <EnableJumpBar>false</EnableJumpBar>
+        <ChartGridMode>Grid</ChartGridMode>
+        <VisualizationId></VisualizationId>
+        <IsUserChart>false</IsUserChart>
+        <EnableChartPicker>false</EnableChartPicker>
+        <RecordsPerPage>10</RecordsPerPage>
+      </parameters>
+    </control>
+  </cell></row></rows>
+</section>
+```
+
+Use the child table's **Associated View** (e.g. "Action Item Associated View") for `ViewId`, not its Active/Lookup view — that's the view type Dataverse designs specifically for subgrid presentation. `RelationshipName` is the relationship's `SchemaName` (find it via `RelationshipDefinitions/Microsoft.Dynamics.CRM.OneToManyRelationshipMetadata?$filter=ReferencingEntity eq 'ctso_actionitem'&$select=SchemaName`).
+
+Splice the new `<section>` in right before the closing `</sections></column></columns></tab></tabs></form>` of an existing valid form, same "extend, don't hand-author" principle as adding fields.
+
+## 10. Dashboards
+
+A dashboard is a `systemform` record like any other, just with `type: 0` instead of `2` (Main), reusing the same `<form><tabs>...` structure:
+
+```http
+POST /systemforms
+{
+  "name": "Contoso Operations Overview",
+  "objecttypecode": null,
+  "type": 0,
+  "formxml": "<form>...</form>"
+}
+```
+
+The panels inside it use the **same grid control** as a subgrid (`classid: {E7A81278-8635-4d9e-8D4D-59480B391C5B}`, minus `RelationshipName` since a dashboard grid isn't scoped to one parent record's related rows — instead its `ViewId` points at any saved view of the target table, e.g. "Active Incidents").
+
+**Gotcha — `<section>` on a dashboard form cannot carry `IsUserDefined`.** The same attribute that's required/expected on a regular main form's `<section>` throws `400 ... cannot contain attribute: IsUserDefined` on a dashboard form. Omit it entirely for dashboard sections.
+
+Add the dashboard to the solution as a component (`componenttype: 60`, same as any other system form) via `POST /AddSolutionComponent`. Wiring it into an AppModule's navigation so it shows up as a page in the app sidebar is comparatively under-documented — if `AddAppComponents` (`@odata.type: Microsoft.Dynamics.CRM.systemform`) doesn't produce a visible `appmodulecomponents` row, the fastest reliable fix is a ~30-second manual step: **App Designer → Add page → Dashboard → select your dashboard**.
+
 ## Removing a table that's referenced by an AppModule
 
 Deleting a table that still has `AppModuleComponent` entries fails with `0x8004f01f ... referenced by 1 other components`. Order matters:
