@@ -1,6 +1,9 @@
 ---
 name: power-platform-pages
 description: Build, script, and deploy Power Pages (portals) backed by Dataverse — web templates, routing, table permissions, anonymous/authenticated access, site settings, and the Enhanced vs Standard Data Model split. Use when the user is working with a Power Pages site, mspp_/adx_ entities, portal auth settings, or Liquid/HTML web templates.
+allowed-tools: [shell]
+argument-hint: "which site, template, or permission issue are you working on?"
+user-invocable: true
 ---
 
 # Power Platform — Power Pages

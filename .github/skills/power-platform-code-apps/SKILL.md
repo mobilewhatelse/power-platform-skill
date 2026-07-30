@@ -1,6 +1,9 @@
 ---
 name: power-platform-code-apps
 description: Build, wire up, and deploy Power Platform Code Apps (React/Vite) and/or standalone Model-driven Apps backed by Dataverse - schema provisioning via the Web API, security roles, native auditing, model-driven app sitemaps/forms/dashboards, solution ALM, multi-app data integrity, and deployment gotchas. Use when the user is working with a Power Apps Code App, a Model-driven App, Dataverse tables/security/solutions, or vibe.powerapps.com exports.
+allowed-tools: [shell]
+argument-hint: "which table, entity, or feature are you working on?"
+user-invocable: true
 ---
 
 # Power Platform Code Apps + Dataverse
