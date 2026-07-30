@@ -43,18 +43,19 @@ Repeat `AddPrivilegesRole` calls per table/privilege combination, or batch sever
 
 ### 4. Don't forget core-platform privileges — a role built entirely by script gets ONLY what you explicitly grant
 
-A security role created via the Maker Portal's role editor comes with a handful of "core platform" privileges pre-checked by default — read access to `usersettings`, `userentityuisettings`, `businessunit`, `team`, `organization`. A role built purely via `AddPrivilegesRole` calls like the ones above gets **none** of these unless you add them yourself, because there's no UI default to inherit from.
+A security role created via the Maker Portal's role editor comes with a long list of "core platform" privileges pre-checked by default — mostly read access to platform/navigation entities (`usersettings`, `businessunit`, `team`, `organization`, entity metadata, and dozens more). A role built purely via `AddPrivilegesRole` calls like the ones above gets **none** of these unless you add them yourself, because there's no UI default to inherit from.
 
-**Symptom**: a user assigned only your custom role can't open any app at all — `RetrieveUserContext: SecLib::CheckPrivilege failed` — even though the role clearly has privileges on all the right tables. This is invisible if you only ever test as a System Administrator, since sysadmin bypasses every privilege check. It only surfaces the first time someone with *just* your custom role (and nothing more privileged) tries to use the app.
+**Symptom**: a user assigned only your custom role can't open any app at all — `RetrieveUserContext: SecLib::CheckPrivilege failed` (naming a `PrivilegeName` like `prvReadUserSettings` or `prvReadEntity`) — even though the role clearly has privileges on all the right business tables. This is invisible if you only ever test as a System Administrator, since sysadmin bypasses every privilege check. It only surfaces the first time someone with *just* your custom role (and nothing more privileged) tries to use the app.
 
-**Fix** — copy the relevant privileges from the out-of-box **Basic User** role, the role Microsoft designs to be the bare minimum every user needs:
+**Don't hand-pick which "core" privileges to copy — copy the entire Basic User set.** The obvious-looking fix is to eyeball a handful of plausibly-core privilege names (User Settings, Business Unit, Team, Organization) and add just those. That's a trap: the out-of-box **Basic User** role — the role Microsoft designs to be the bare minimum every user needs — actually grants **~480 privileges**, and Unified Interface's user-context checks aren't limited to the handful anyone would guess up front. Fixing one missing privilege this way often just uncovers the next one on the following login attempt. Diff and copy the *whole* set instead:
 
 ```http
 GET /roles?$filter=name eq 'Basic User'&$select=roleid
 GET /RetrieveRolePrivilegesRole(RoleId=<basic-user-roleid>)
+GET /RetrieveRolePrivilegesRole(RoleId=<your-custom-roleid>)
 ```
 
-Filter the response's `RolePrivileges` to names matching `prv*UserSettings`, `prv*UserEntityUISettings`, `prvReadBusinessUnit`, `prvReadTeam`, `prvReadOrganization*` (typically ~11 entries), then add them to your role, using the **exact same `Depth` value** `RetrieveRolePrivilegesRole` returned for each:
+Add every privilege present on Basic User but missing from your role (compare by `PrivilegeId`), using the **exact same `Depth` value** `RetrieveRolePrivilegesRole` returned for each:
 
 ```http
 POST /roles(<your-custom-roleid>)/Microsoft.Dynamics.CRM.AddPrivilegesRole
@@ -64,6 +65,8 @@ POST /roles(<your-custom-roleid>)/Microsoft.Dynamics.CRM.AddPrivilegesRole
   ]
 }
 ```
+
+Basic User has **zero** privileges on your own custom tables, so copying its full set can't accidentally grant broader business-data access than you intended — it only adds the platform-navigation baseline every role needs.
 
 **Checklist**: after creating any custom role by script, test app access with an account that has been assigned **only** that role — never rely on a System Administrator test account to validate a new role's completeness.
 
