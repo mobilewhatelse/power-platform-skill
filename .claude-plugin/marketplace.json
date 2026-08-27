@@ -1,0 +1,33 @@
+{
+  "name": "power-platform-skill",
+  "owner": {
+    "name": "mobilewhatelse"
+  },
+  "metadata": {
+    "description": "Power Platform skills for Claude Code and GitHub Copilot CLI - Code Apps, Model-driven Apps, Power Pages, Copilot Studio, all scripted against the Dataverse Web API",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "power-platform",
+      "source": "./",
+      "description": "Build, wire up, and deploy Power Platform Code Apps and Model-driven Apps backed by Dataverse; build and script Power Pages sites; script Copilot Studio agents - all directly against the Dataverse Web API",
+      "version": "0.1.0",
+      "skills": [
+        "./.github/skills/power-platform-code-apps",
+        "./.github/skills/power-platform-pages",
+        "./.github/skills/power-platform-copilot-studio"
+      ],
+      "repository": "https://github.com/mobilewhatelse/power-platform-skill",
+      "keywords": [
+        "power-platform",
+        "power-apps",
+        "code-apps",
+        "power-pages",
+        "copilot-studio",
+        "dataverse"
+      ],
+      "license": "MIT"
+    }
+  ]
+}
