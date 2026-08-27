@@ -6,7 +6,14 @@ No project-specific or organization-specific content — just the mechanics of t
 
 ## Using these skills
 
-### Claude Code
+### Claude Code CLI / GitHub Copilot CLI (plugin marketplace)
+```
+/plugin marketplace add mobilewhatelse/power-platform-skill
+/plugin install power-platform@power-platform-skill
+```
+Gets you an update command (`/plugin update`) and version tracking — see [CHANGELOG.md](CHANGELOG.md) for what changed between versions.
+
+### Claude Code (file-based, no plugin install)
 Add this repo as a skills source in your project's `.claude/settings.json`, or reference individual skill files directly in chat. Skills are in `.github/skills/<skill-name>/SKILL.md`.
 
 ### GitHub Copilot (VS Code)

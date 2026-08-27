@@ -23,3 +23,15 @@ user-invocable: true
 ## Structure
 
 Each skill lives in its own subdirectory with a `SKILL.md` entry point and a `references/` folder of focused markdown files. The `SKILL.md` links to the reference files — load only the one relevant to the current task, not all of them upfront.
+
+## Plugin marketplace — checklist when adding a new skill
+
+This repo is also installable as a Claude Code / GitHub Copilot CLI plugin marketplace via `.claude-plugin/marketplace.json`. That file is the **only** thing that makes a skill folder discoverable through `/plugin install` — adding a new `.github/skills/<name>/` folder is not enough on its own. Whenever a new skill is added (or an existing one meaningfully changes):
+
+1. Add the new skill's folder path to the `skills` array of the `power-platform` plugin entry in `.claude-plugin/marketplace.json` (one plugin bundles every skill in this repo — don't create a second plugin entry unless the new content is genuinely a separate, independently-installable thing).
+2. Bump **both** `version` fields in `marketplace.json` (top-level `metadata.version` and the plugin's own `version`) — this is what lets an existing install's `/plugin update` detect there's something new. Forgetting this means the change ships but nobody with an existing install ever sees it.
+3. Add a one-line entry to `CHANGELOG.md` describing what changed, so someone running `/plugin update` can see why.
+4. Update the skill table in `README.md` if a new reference file or skill folder was added.
+5. Run `claude plugin validate .` before committing — catches manifest schema errors early.
+
+The plain file-based install paths (Claude Code project `.claude/settings.json`, GitHub Copilot VS Code auto-discovery of `.github/skills/`) don't read `marketplace.json` at all and need no extra step beyond the skill files themselves — the checklist above only matters for the `/plugin marketplace add` + `/plugin install` path.
