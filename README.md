@@ -38,6 +38,7 @@ Entry point: [`.github/skills/power-platform-code-apps/SKILL.md`](.github/skills
 | [`multi-app-data-integrity.md`](.github/skills/power-platform-code-apps/references/multi-app-data-integrity.md) | Shared-table null-field risks between multiple apps |
 | [`solution-alm.md`](.github/skills/power-platform-code-apps/references/solution-alm.md) | Solution components, export, package verification |
 | [`code-app-deployment.md`](.github/skills/power-platform-code-apps/references/code-app-deployment.md) | SDK/CLI versions, static-asset bundling trap, deploy sequence |
+| [`connector-data-sources.md`](.github/skills/power-platform-code-apps/references/connector-data-sources.md) | Wiring a Code App to a non-Dataverse connector (e.g. Copilot Studio) — pre-existing connection requirement, path-mangling gotcha, a client-side singleton bug that breaks connector calls silently, required-but-undocumented fields |
 | [`troubleshooting.md`](.github/skills/power-platform-code-apps/references/troubleshooting.md) | Error messages → causes → fixes |
 
 ---
