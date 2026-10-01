@@ -1,9 +1,7 @@
 ---
 name: power-platform-copilot-studio
 description: Script and manage Copilot Studio agents via the Dataverse Web API — bot/botcomponent entity structure, setting instructions, icons (authoring vs. Teams/M365), and publish-time validation gotchas. Use when the user is working with a Copilot Studio agent, the `bots` or `botcomponents` Dataverse entities, or bot icons/manifests.
-allowed-tools: [shell]
-argument-hint: "which agent, icon, or botcomponent are you working on?"
-user-invocable: true
+license: MIT
 ---
 
 # Power Platform — Copilot Studio

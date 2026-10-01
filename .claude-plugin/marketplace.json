@@ -5,14 +5,14 @@
   },
   "metadata": {
     "description": "Power Platform skills for Claude Code and GitHub Copilot CLI - Code Apps, Model-driven Apps, Power Pages, Copilot Studio, all scripted against the Dataverse Web API",
-    "version": "0.2.0"
+    "version": "0.2.1"
   },
   "plugins": [
     {
       "name": "power-platform",
       "source": "./",
       "description": "Build, wire up, and deploy Power Platform Code Apps and Model-driven Apps backed by Dataverse; build and script Power Pages sites; script Copilot Studio agents - all directly against the Dataverse Web API",
-      "version": "0.2.0",
+      "version": "0.2.1",
       "skills": [
         "./.github/skills/power-platform-code-apps",
         "./.github/skills/power-platform-pages",
